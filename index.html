@@ -160,6 +160,15 @@
             position: absolute;
         }
 
+        .horizontal_wall{
+            width: 390px;
+            height: 20px;
+            left: 102px;
+            top: 220px;
+            background-color: #4e555b;
+            position: absolute;
+        }
+
         .mg-3{
             margin: 3px !important;
         }
@@ -167,6 +176,7 @@
         .m-r-40{
             margin-right: 40px !important; ;
         }
+
         .m-l-16{
             margin-left: 16px !important;
         }
@@ -877,6 +887,148 @@
         }, 60)
     }
 
+    //xử lí level 4 brick pong
+    function mode2_lv5() {
+        //khởi tạo biến
+        var game = $('#game-brick');
+        var ball = $('#ball');
+        var paddle = $("#paddle");
+        var wall = $('.vertical_wall');
+        var horizontal_wall = $('.horizontal_wall');
+        var ballSpeed = 20;
+        var ballDX = -ballSpeed;
+        var ballDY = -ballSpeed;
+        var life = 3;
+        var bricks = $('.brick');
+        setInterval(movePaddle1, 20);
+
+        move = setInterval(function () {
+            var ballX = parseInt(ball.css("left"));
+            var ballY = parseInt(ball.css("top"));
+            var ballLeft = parseInt(ball.css("left"));
+            var ballTop = parseInt(ball.css("top"));
+            var ballLeft1 = ball.offset().left;
+            var ballTop1 = ball.offset().top;
+            var ballWidth = ball.width();
+            var ballHeight = ball.height();
+
+            bricks.each(function () {
+                var brick = $(this);
+                var brickLeft = brick.offset().left;
+                var brickTop = brick.offset().top;
+                var brickWidth = brick.width();
+                var brickHeight = brick.height();
+                if (!brick.hasClass("broke")) {
+                    if (ballLeft1 + ballWidth > brickLeft && ballLeft1 < brickLeft + brickWidth &&
+                        ballTop1 + ballHeight > brickTop && ballTop1 < brickTop + brickHeight) {
+                        if(brick.hasClass("stone")){
+                            brick.removeClass("stone")
+                            ballDY = -ballDY;
+                            va_cham.play();
+                        }else{
+                            brick.addClass("broke");
+                            ballDY = -ballDY;
+                            va_cham.play();
+                        }
+
+                    }
+                }
+            })
+            var wallLeft= 290;
+            var wallRight= 310;
+            // ball chạm wall
+            if(ballTop<= wall.height() && ballLeft + ball.width()>= wallLeft && ballLeft + ball.width() <= wallRight){
+                ballDY = -ballDY;
+                va_cham.play();
+            }
+            if(ballLeft === wallRight && ballTop + ballHeight <= wall.height() ){
+                ballDX = -ballDX;
+                va_cham.play();
+            }
+            if(ballLeft + ballWidth === wallLeft && ballTop + ballHeight <= wall.height() ){
+                ballDX = -ballDX;
+                va_cham.play();
+            }
+
+            var horizontalWallLeft= 102;
+            var horizontalWallRight= 102 + 390;
+            var horizontalWallTop= 220;
+
+            // ball chạm horizontal wall
+            if(ballTop + ball.height() === horizontalWallTop && ballLeft + ball.width()>= horizontalWallLeft && ballLeft + ball.width() <= horizontalWallRight){
+                ballDY = -ballDY;
+                va_cham.play();
+            }
+            if(ballTop === horizontalWallTop + 20  && ballLeft + ball.width()>= horizontalWallLeft && ballLeft + ball.width() <= horizontalWallRight){
+                ballDY = -ballDY;
+                va_cham.play();
+            }
+            if(ballLeft === horizontalWallRight && ballTop + ballHeight <= horizontal_wall.height() && ballTop + ballHeight >= horizontalWallTop){
+                ballDX = -ballDX;
+                va_cham.play();
+            }
+            if(ballLeft + ballWidth === horizontalWallLeft && ballTop + ballHeight <= horizontalWallTop + horizontal_wall.height() && ballTop + ballHeight >= horizontalWallTop){
+                ballDX = -ballDX;
+                va_cham.play();
+            }
+
+            //ball chạm trái phải
+            if (ballLeft <= 0 || ballLeft >= (game.width() - ball.width())) {
+                ballDX = -ballDX;
+                va_cham.play();
+            }
+            //ball chạm trên
+            if (ballTop <= 0) {
+                ballDY = -ballDY;
+                va_cham.play();
+            }
+            //ball chạm dưới
+            if (ballTop > (game.height() - ball.width())) {
+                life -= 1;
+                $(".life").text("Life: " + life);
+                ballX = 290;
+                ballY = 660;
+                ballDY = -ballDY;
+                tru.play();
+            }
+
+            if (collision(ball, paddle)) {
+                ballDY = -ballDY;
+                va_cham.play();
+            }
+
+            if (life === 0) {
+                $('#game-brick').css('opacity', '0.6')
+                $('.container').append(`
+                        <div class="choose_option_brick">
+                            <h3>You Lose!</h3>
+                            <div class="button" id="restart" onclick="restartlv5()"><p>Restart</p></div>
+                            <div class="button" id="main" onclick="menu2()"><p>Main menu</p></div>
+                        </div>
+                    `)
+                thua.play();
+                clearInterval(move)
+            }
+
+            if ($('.broke').length === 36) {
+                $('#game-brick').css('opacity', '0.6')
+                $('.container').append(`
+                        <div class="choose_option_brick">
+                            <h3>You Won!</h3>
+                            <div class="button" id="next" onclick="lv5()"><p>Next level</p></div>
+                            <div class="button" id="restart" onclick="restartlv4()"><p>Restart</p></div>
+                            <div class="button" id="main" onclick="menu2()"><p>Main menu</p></div>
+                        </div>
+                    `)
+                thang.play();
+                clearInterval(move)
+            }
+
+
+            ball.css({left: ballX + ballDX, top: ballY + ballDY});
+        }, 60)
+    }
+
     //di chuyển paddle cho ping pong
     function movePaddle() {
         // Lấy phần tử paddle1 và paddle2
@@ -1121,6 +1273,49 @@
         mode2_lv4();
     }
 
+    //tạo level 5 của brick pong
+    function lv5() {
+        $(".mode").remove();
+        $(".choose_option_brick").remove();
+        $("#game-brick").empty().append(`
+            <div class="life">Life: 3</div>
+            <div id="paddle"></div>
+            <div id="ball" class="ball"></div>
+            <div class="vertical_wall"></div>
+            <div class="horizontal_wall"></div>
+            <div class="container-bricks"></div>`
+        );
+        var numBricksPerRow = 6;
+        var numRows = 6;
+        var r;
+        var brick;
+        for (var row = 0; row < numRows; row++) {
+            r = $('<div>').addClass("row");
+            for (var col = 0; col < numBricksPerRow; col++) {
+                if(col === row || row===3){
+                    if (col === 2) {
+                        brick = $("<div>").addClass('stone m-r-40 mg-3 brick brick' + '-' + row + '-' + col);
+                    } else if (col === 0) {
+                        brick = $("<div>").addClass('stone m-l-16 mg-3 brick brick' + '-' + row + '-' + col);
+                    } else {
+                        brick = $("<div>").addClass('stone mg-3 brick brick' + '-' + row + '-' + col);
+                    }
+                }else{
+                    if (col === 2) {
+                        brick = $("<div>").addClass('m-r-40 mg-3 brick brick' + '-' + row + '-' + col);
+                    } else if (col === 0) {
+                        brick = $("<div>").addClass('m-l-16 mg-3 brick brick' + '-' + row + '-' + col);
+                    } else {
+                        brick = $("<div>").addClass('mg-3 brick brick' + '-' + row + '-' + col);
+                    }
+                }
+                r.append(brick);
+            }
+            $('.container-bricks').append(r);
+        }
+        mode2_lv5();
+    }
+
     //kiểm tra va chạm giữa 2 element
     function collision(element1, element2) {
         var element1Left = parseInt(element1.css("left"));
@@ -1155,7 +1350,8 @@
                         <div id="level2" class="button" onclick="lv2()">Level 2</div>
                         <div id="level3" class="button" onclick="lv3()">Level 3</div>
                         <div id="level4" class="button" onclick="lv4()">Level 4</div>
-                        <div id="goback" class="button" onclick="menu2()">Back</div>
+                        <div id="level5" class="button" onclick="lv5()">Level 5</div>
+                        <div id="back" class="button" onclick="menu2()">Back</div>
                     </div>
                 </div>
                     `)
@@ -1234,6 +1430,21 @@
                 </div>`
         );
         lv4();
+    }
+
+    function restartlv5() {
+        $(".container").empty().append(`
+            <div id="game-brick">
+                    <div class="mode">
+                        <div id="level1" class="button" onclick="lv1()">Level 1</div>
+                        <div id="level2" class="button" onclick="lv2()">Level 2</div>
+                        <div id="level3" class="button" onclick="lv3()">Level 3</div>
+                        <div id="level4" class="button" onclick="lv4()">Level 4</div>
+                        <div id="goback" class="button" onclick="menu2()">Back</div>
+                    </div>
+                </div>`
+        );
+        lv5();
     }
 </script>
 </body>
